@@ -1,6 +1,6 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
-import { auth } from "./firebase";
+import { auth } from "../routes/firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
 import {
@@ -11,6 +11,8 @@ import {
     Title,
     Wrapper,
 } from "../components/auth-components";
+import GithubButton from "../components/github-btn";
+import GoogleButton from "../components/google-btn";
 
 export default function CreateAccount() {
     const navigate = useNavigate();
@@ -56,7 +58,7 @@ export default function CreateAccount() {
     };
     return (
         <Wrapper>
-            <Title>Join 𝕏</Title>
+            <Title>Join TweetDock</Title>
             <Form onSubmit={onSubmit}>
                 <Input
                     onChange={onChange}
@@ -91,6 +93,8 @@ export default function CreateAccount() {
             <Switcher>
                 Already have an account? <Link to="/login">Log in &rarr;</Link>
             </Switcher>
+            <GithubButton />
+            <GoogleButton />
         </Wrapper>
     );
 }

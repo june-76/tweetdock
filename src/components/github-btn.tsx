@@ -17,6 +17,10 @@ const Button = styled.span`
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    &:hover {
+        color: #ffffff;
+        background-color: #ffe863;
+    }
 `;
 
 const Logo = styled.img`

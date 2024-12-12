@@ -11,8 +11,8 @@ import {
     Title,
     Wrapper,
 } from "../components/auth-components";
-import GithubButton from "../components/github-btn";
-import GoogleButton from "../components/google-btn";
+import GithubButton from "../components/google-btn";
+import GoogleButton from "../components/github-btn";
 
 export default function CreateAccount() {
     const navigate = useNavigate();

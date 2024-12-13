@@ -4,13 +4,12 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCVWjd24_JdRmKIQLhpPxYEwYveUJrC-f0",
-    authDomain: "tweetdock-48bbf.firebaseapp.com",
-    projectId: "tweetdock-48bbf",
-    storageBucket: "tweetdock-48bbf.firebasestorage.app",
-    messagingSenderId: "718408251093",
-    appId: "1:718408251093:web:bb8f639f122f6cfbdb545c",
-    measurementId: "G-0SD7YL1BXF",
+    apiKey: "AIzaSyC6w9GYopJMLy_f22DGhW7zzD68pV7vwzM",
+    authDomain: "tweetdock-96171.firebaseapp.com",
+    projectId: "tweetdock-96171",
+    storageBucket: "tweetdock-96171.firebasestorage.app",
+    messagingSenderId: "534020399506",
+    appId: "1:534020399506:web:ccd61d3120a57f681aa14b",
 };
 
 const app = initializeApp(firebaseConfig);

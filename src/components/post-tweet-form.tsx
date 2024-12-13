@@ -80,7 +80,25 @@ export default function PostTweetForm() {
         const { files } = e.target;
 
         if (files && files.length === 1) {
-            setFile(files[0]);
+            const file = files[0];
+
+            // 파일 형식 체크
+            // jpg, png, gif 파일만 업로드 가능
+            const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+            if (!allowedTypes.includes(file.type)) {
+                alert("Only JPG, PNG, and GIF files are allowed.");
+                return;
+            }
+
+            // 파일 크기 체크
+            // 10MB 미만의 파일만 업로드 가능
+            const maxSizeInBytes = 10 * 1024 * 1024;
+            if (file.size > maxSizeInBytes) {
+                alert("File size must be less than 10MB.");
+                return;
+            }
+
+            setFile(file);
         }
     };
 
@@ -130,7 +148,7 @@ export default function PostTweetForm() {
             <TextArea
                 required
                 rows={5}
-                maxLength={180}
+                maxLength={140}
                 onChange={onChange}
                 value={tweet}
                 placeholder="What is happening?!"

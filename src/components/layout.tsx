@@ -24,15 +24,15 @@ const MenuItem = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid white;
+    border: 3px solid white;
     height: 50px;
     width: 50px;
     border-radius: 50%;
     svg {
-        width: 30px;
+        width: 32px;
         fill: white;
     }
-    &.log-out {
+    &:hover {
         border-color: #ffe863;
         svg {
             fill: #ffe863;
@@ -55,16 +55,16 @@ export default function Layout() {
                 <Link to="/">
                     <MenuItem>
                         <svg
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
+                            width="100"
+                            height="100"
+                            viewBox="0 0 100 100"
                             xmlns="http://www.w3.org/2000/svg"
                             aria-hidden="true"
                         >
-                            <path
-                                clipRule="evenodd"
-                                fillRule="evenodd"
-                                d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z"
-                            />
+                            <path d="M10 70 Q50 100 90 70 Z" />
+                            <rect x="48" y="20" width="4" height="50" />
+                            <path d="M50 10 L20 50 L50 50 Z" />
+                            <path d="M50 10 L50 50 L80 50 Z" />
                         </svg>
                     </MenuItem>
                 </Link>
@@ -77,6 +77,26 @@ export default function Layout() {
                             aria-hidden="true"
                         >
                             <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                        </svg>
+                    </MenuItem>
+                </Link>
+                <Link to="/search">
+                    <MenuItem>
+                        <svg
+                            width="100"
+                            height="100"
+                            viewBox="0 0 100 100"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true"
+                        >
+                            <circle cx="40" cy="40" r="26" />
+                            <rect
+                                x="60"
+                                y="50"
+                                width="32"
+                                height="10"
+                                transform="rotate(45 50 50)"
+                            />
                         </svg>
                     </MenuItem>
                 </Link>

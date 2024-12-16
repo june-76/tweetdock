@@ -106,7 +106,6 @@ export default function Layout() {
     const searchInFirestore = async (queryText: string) => {
         const db = getFirestore();
         const collectionRef = collection(db, "tweets");
-        // const q = query(collectionRef, where("tweet", "==", queryText));
         const q = query(
             collectionRef,
             orderBy("tweet"),
@@ -130,12 +129,23 @@ export default function Layout() {
         setSearchResults(results); // 검색 결과 상태에 데이터 설정
     };
 
+    // 검색어 입력 핸들러 (검색 요청을 위한 상태 업데이트만)
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchQuery(value); // 검색어 상태 업데이트
-        if (value.length > 2) {
+        setSearchQuery(e.target.value); // 검색어 상태 업데이트
+    };
+
+    // 돋보기 버튼 클릭 시 검색 실행
+    const handleSearch = () => {
+        if (searchQuery.length > 2) {
             // 최소 3글자 이상일 때만 검색
-            searchInFirestore(value); // Firestore 쿼리 실행
+            searchInFirestore(searchQuery); // Firestore 쿼리 실행
+        }
+    };
+
+    // Enter 키를 눌렀을 때 검색 실행
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" && searchQuery.length > 2) {
+            searchInFirestore(searchQuery); // Firestore 쿼리 실행
         }
     };
 
@@ -203,8 +213,11 @@ export default function Layout() {
                 placeholder="검색어 입력"
                 value={searchQuery}
                 onChange={handleInputChange}
+                onKeyDown={handleKeyPress} // Enter 키 이벤트 처리
             />
-            <SearchBtn>
+            <SearchBtn onClick={handleSearch}>
+                {" "}
+                {/* 돋보기 버튼 클릭 시 검색 */}
                 <svg
                     width="100"
                     height="100"

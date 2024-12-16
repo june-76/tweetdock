@@ -1,15 +1,36 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { styled } from "styled-components";
 import { auth } from "../routes/firebase";
+import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs,
+    orderBy,
+    startAt,
+    endAt,
+} from "firebase/firestore";
+import { useState } from "react";
+
+export interface ITweet {
+    id: string;
+    photo?: string;
+    tweet: string;
+    userId: string;
+    username: string;
+    createdAt: number;
+}
 
 const Wrapper = styled.div`
     display: grid;
     gap: 20px;
     grid-template-columns: 1fr 4fr;
     height: 100%;
-    padding: 50px 0px;
+    padding: 80px 0px;
     width: 100%;
     max-width: 860px;
+    position: relative; /* Wrapper 내에서 절대 위치 설정 가능 */
 `;
 
 const Menu = styled.div`
@@ -40,15 +61,92 @@ const MenuItem = styled.div`
     }
 `;
 
+const SearchBtn = styled.div`
+    position: absolute; /* Wrapper 내에서 절대 위치 */
+    top: 20px; /* Outlet 상단에서 떨어진 위치 */
+    right: 2px; /* Outlet 우측에서 떨어진 위치 */
+    cursor: pointer;
+    border: 3px solid white;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+        width: 32px;
+        fill: white;
+    }
+    &:hover {
+        border-color: #ffe863;
+        svg {
+            fill: #ffe863;
+        }
+    }
+`;
+
+const SearchInput = styled.input`
+    position: absolute;
+    top: 20px;
+    right: 50px;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    outline: none;
+    width: 200px;
+`;
+
 export default function Layout() {
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태
+    const [searchResults, setSearchResults] = useState<ITweet[]>([]); // 검색 결과 상태
+
+    // 파이어스토어에서 검색어에 해당하는 데이터 찾기
+    const searchInFirestore = async (queryText: string) => {
+        const db = getFirestore();
+        const collectionRef = collection(db, "tweets");
+        // const q = query(collectionRef, where("tweet", "==", queryText));
+        const q = query(
+            collectionRef,
+            orderBy("tweet"),
+            startAt(queryText),
+            endAt(queryText + "\uf8ff")
+        );
+
+        const querySnapshot = await getDocs(q);
+        const results: ITweet[] = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                tweet: data.tweet,
+                userId: data.userId,
+                username: data.username,
+                photo: data.photo,
+                createdAt: data.createdAt,
+            };
+        });
+        console.log(results); // 검색 결과 콘솔에 출력
+        setSearchResults(results); // 검색 결과 상태에 데이터 설정
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchQuery(value); // 검색어 상태 업데이트
+        if (value.length > 2) {
+            // 최소 3글자 이상일 때만 검색
+            searchInFirestore(value); // Firestore 쿼리 실행
+        }
+    };
+
     const onLogOut = async () => {
-        const ok = confirm("Are you sure you want to log out?");
+        const ok = confirm("로그아웃하시겠습니까?");
         if (ok) {
             await auth.signOut();
             navigate("/login");
         }
     };
+
     return (
         <Wrapper>
             <Menu>
@@ -80,26 +178,6 @@ export default function Layout() {
                         </svg>
                     </MenuItem>
                 </Link>
-                <Link to="/search">
-                    <MenuItem>
-                        <svg
-                            width="100"
-                            height="100"
-                            viewBox="0 0 100 100"
-                            xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true"
-                        >
-                            <circle cx="40" cy="40" r="26" />
-                            <rect
-                                x="60"
-                                y="50"
-                                width="32"
-                                height="10"
-                                transform="rotate(45 50 50)"
-                            />
-                        </svg>
-                    </MenuItem>
-                </Link>
                 <MenuItem onClick={onLogOut} className="log-out">
                     <svg
                         fill="currentColor"
@@ -115,11 +193,35 @@ export default function Layout() {
                         <path
                             clipRule="evenodd"
                             fillRule="evenodd"
-                            d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z"
+                            d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 00-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z"
                         />
                     </svg>
                 </MenuItem>
             </Menu>
+            <SearchInput
+                type="text"
+                placeholder="검색어 입력"
+                value={searchQuery}
+                onChange={handleInputChange}
+            />
+            <SearchBtn>
+                <svg
+                    width="100"
+                    height="100"
+                    viewBox="0 0 100 100"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                >
+                    <circle cx="40" cy="40" r="24" />
+                    <rect
+                        x="60"
+                        y="50"
+                        width="26"
+                        height="10"
+                        transform="rotate(45 50 50)"
+                    />
+                </svg>
+            </SearchBtn>
             <Outlet />
         </Wrapper>
     );

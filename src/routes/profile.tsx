@@ -5,11 +5,11 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import {
     collection,
-    getDocs,
-    limit,
+    onSnapshot,
     orderBy,
     query,
     where,
+    limit,
 } from "firebase/firestore";
 import { ITweet } from "../components/timeline";
 import Tweet from "../components/tweet";
@@ -20,6 +20,7 @@ const Wrapper = styled.div`
     flex-direction: column;
     gap: 20px;
 `;
+
 const AvatarUpload = styled.label`
     width: 80px;
     overflow: hidden;
@@ -41,9 +42,11 @@ const AvatarUpload = styled.label`
 const AvatarImg = styled.img`
     width: 100%;
 `;
+
 const AvatarInput = styled.input`
     display: none;
 `;
+
 const Name = styled.span`
     font-size: 22px;
 `;
@@ -83,7 +86,8 @@ export default function Profile() {
             });
         }
     };
-    const fetchTweets = async () => {
+
+    useEffect(() => {
         const tweetQuery = query(
             collection(db, "tweets"),
             where("userId", "==", user?.uid),
@@ -91,26 +95,25 @@ export default function Profile() {
             limit(10)
         );
 
-        const snapshot = await getDocs(tweetQuery);
+        const unsubscribe = onSnapshot(tweetQuery, (snapshot) => {
+            const tweets = snapshot.docs.map((doc) => {
+                const { tweet, createdAt, userId, username, photo } =
+                    doc.data();
 
-        const tweets = snapshot.docs.map((doc) => {
-            const { tweet, createdAt, userId, username, photo } = doc.data();
+                return {
+                    tweet,
+                    createdAt,
+                    userId,
+                    username,
+                    photo,
+                    id: doc.id,
+                };
+            });
 
-            return {
-                tweet,
-                createdAt,
-                userId,
-                username,
-                photo,
-                id: doc.id,
-            };
+            setTweets(tweets);
         });
 
-        setTweets(tweets);
-    };
-
-    useEffect(() => {
-        fetchTweets();
+        return () => unsubscribe();
     }, []);
 
     return (

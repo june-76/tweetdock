@@ -53,9 +53,12 @@ const Name = styled.span`
 
 const Tweets = styled.div`
     display: flex;
-    width: 100%;
-    flex-direction: column;
+    background-color: whitesmoke;
+    padding: 10px;
+    margin-bottom: 50px;
+    border-radius: 10px;
     gap: 10px;
+    flex-direction: column;
 `;
 
 export default function Profile() {

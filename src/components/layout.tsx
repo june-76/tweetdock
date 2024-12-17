@@ -5,7 +5,6 @@ import {
     getFirestore,
     collection,
     query,
-    where,
     getDocs,
     orderBy,
     startAt,
@@ -61,14 +60,20 @@ const MenuItem = styled.div`
     }
 `;
 
+const SearchContainer = styled.div`
+    position: absolute;
+    top: 24px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+`;
+
 const SearchBtn = styled.div`
-    position: absolute; /* Wrapper 내에서 절대 위치 */
-    top: 20px; /* Outlet 상단에서 떨어진 위치 */
-    right: 2px; /* Outlet 우측에서 떨어진 위치 */
     cursor: pointer;
     border: 3px solid white;
-    height: 40px;
-    width: 40px;
+    height: 36px;
+    width: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -86,9 +91,6 @@ const SearchBtn = styled.div`
 `;
 
 const SearchInput = styled.input`
-    position: absolute;
-    top: 20px;
-    right: 50px;
     padding: 8px;
     font-size: 14px;
     border-radius: 5px;
@@ -208,33 +210,35 @@ export default function Layout() {
                     </svg>
                 </MenuItem>
             </Menu>
-            <SearchInput
-                type="text"
-                placeholder="검색어 입력"
-                value={searchQuery}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyPress} // Enter 키 이벤트 처리
-            />
-            <SearchBtn onClick={handleSearch}>
-                {" "}
-                {/* 돋보기 버튼 클릭 시 검색 */}
-                <svg
-                    width="100"
-                    height="100"
-                    viewBox="0 0 100 100"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                >
-                    <circle cx="40" cy="40" r="24" />
-                    <rect
-                        x="60"
-                        y="50"
-                        width="26"
-                        height="10"
-                        transform="rotate(45 50 50)"
-                    />
-                </svg>
-            </SearchBtn>
+            <SearchContainer>
+                <SearchInput
+                    type="text"
+                    placeholder="검색"
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyPress} // Enter 키 이벤트 처리
+                />
+                <SearchBtn onClick={handleSearch}>
+                    {" "}
+                    {/* 돋보기 버튼 클릭 시 검색 */}
+                    <svg
+                        width="100"
+                        height="100"
+                        viewBox="0 0 100 100"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                    >
+                        <circle cx="40" cy="40" r="24" />
+                        <rect
+                            x="60"
+                            y="50"
+                            width="26"
+                            height="10"
+                            transform="rotate(45 50 50)"
+                        />
+                    </svg>
+                </SearchBtn>
+            </SearchContainer>
             <Outlet />
         </Wrapper>
     );

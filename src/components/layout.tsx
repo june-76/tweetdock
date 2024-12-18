@@ -11,6 +11,7 @@ import {
     endAt,
 } from "firebase/firestore";
 import { useState } from "react";
+import ResultTweet from "./result-tweet"; // result-tweet.tsx import
 
 export interface ITweet {
     id: string;
@@ -24,12 +25,12 @@ export interface ITweet {
 const Wrapper = styled.div`
     display: grid;
     gap: 20px;
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 1fr 4fr 1fr;
     height: 100%;
     padding: 80px 0px;
     width: 100%;
     max-width: 860px;
-    position: relative; /* Wrapper 내에서 절대 위치 설정 가능 */
+    position: relative;
 `;
 
 const Menu = styled.div`
@@ -138,15 +139,15 @@ export default function Layout() {
 
     // 돋보기 버튼 클릭 시 검색 실행
     const handleSearch = () => {
-        if (searchQuery.length > 2) {
-            // 최소 3글자 이상일 때만 검색
+        if (searchQuery.length > 1) {
+            // 최소 2글자 이상일 때만 검색
             searchInFirestore(searchQuery); // Firestore 쿼리 실행
         }
     };
 
     // Enter 키를 눌렀을 때 검색 실행
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && searchQuery.length > 2) {
+        if (e.key === "Enter" && searchQuery.length > 1) {
             searchInFirestore(searchQuery); // Firestore 쿼리 실행
         }
     };
@@ -240,6 +241,7 @@ export default function Layout() {
                 </SearchBtn>
             </SearchContainer>
             <Outlet />
+            <ResultTweet tweets={searchResults} />
         </Wrapper>
     );
 }

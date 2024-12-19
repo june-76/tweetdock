@@ -25,11 +25,11 @@ export interface ITweet {
 const Wrapper = styled.div`
     display: grid;
     gap: 20px;
-    grid-template-columns: 1fr 4fr 1fr;
+    grid-template-columns: 1fr 4fr 3fr;
     height: 100%;
     padding: 80px 0px;
     width: 100%;
-    max-width: 860px;
+    max-width: 1200px;
     position: relative;
 `;
 
@@ -70,6 +70,14 @@ const SearchContainer = styled.div`
     gap: 10px;
 `;
 
+const SearchResultsContainer = styled.div`
+    display: flex;
+    flex-direction: row; // 가로 방향 정렬
+    gap: 15px; // 검색 결과들 사이의 간격
+    overflow-x: auto; // 가로 스크롤 허용
+    padding: 10px; // 여백 추가
+`;
+
 const SearchBtn = styled.div`
     cursor: pointer;
     border: 3px solid white;
@@ -100,10 +108,17 @@ const SearchInput = styled.input`
     width: 200px;
 `;
 
+interface SearchResult {
+    query: string; // 검색어
+    tweets: ITweet[]; // 검색 결과
+    hasSearched: boolean; // 검색 여부
+}
+
 export default function Layout() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태
-    const [searchResults, setSearchResults] = useState<ITweet[]>([]); // 검색 결과 상태
+    // 검색 결과들을 배열로 관리
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
     // 파이어스토어에서 검색어에 해당하는 데이터 찾기
     const searchInFirestore = async (queryText: string) => {
@@ -117,19 +132,30 @@ export default function Layout() {
         );
 
         const querySnapshot = await getDocs(q);
-        const results: ITweet[] = querySnapshot.docs.map((doc) => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                tweet: data.tweet,
-                userId: data.userId,
-                username: data.username,
-                photo: data.photo,
-                createdAt: data.createdAt,
+        const results: ITweet[] = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            tweet: doc.data().tweet,
+            userId: doc.data().userId,
+            username: doc.data().username,
+            photo: doc.data().photo,
+            createdAt: doc.data().createdAt,
+        }));
+
+        // 새로운 검색 결과를 배열에 추가 (최대 3개까지)
+        setSearchResults((prev) => {
+            const newResult = {
+                query: queryText,
+                tweets: results,
+                hasSearched: true,
             };
+
+            // 이미 3개가 있다면 가장 오래된 것을 제거하고 새것을 추가
+            if (prev.length >= 3) {
+                return [...prev.slice(1), newResult];
+            }
+            // 3개 미만이면 그냥 추가
+            return [...prev, newResult];
         });
-        console.log(results); // 검색 결과 콘솔에 출력
-        setSearchResults(results); // 검색 결과 상태에 데이터 설정
     };
 
     // 검색어 입력 핸들러 (검색 요청을 위한 상태 업데이트만)
@@ -139,15 +165,15 @@ export default function Layout() {
 
     // 돋보기 버튼 클릭 시 검색 실행
     const handleSearch = () => {
-        if (searchQuery.length > 1) {
-            // 최소 2글자 이상일 때만 검색
+        if (searchQuery.length > 0) {
+            // 최소 1글자 이상일 때만 검색
             searchInFirestore(searchQuery); // Firestore 쿼리 실행
         }
     };
 
     // Enter 키를 눌렀을 때 검색 실행
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && searchQuery.length > 1) {
+        if (e.key === "Enter" && searchQuery.length > 0) {
             searchInFirestore(searchQuery); // Firestore 쿼리 실행
         }
     };
@@ -241,7 +267,17 @@ export default function Layout() {
                 </SearchBtn>
             </SearchContainer>
             <Outlet />
-            <ResultTweet tweets={searchResults} />
+            <SearchResultsContainer>
+                {/* 검색 결과들을 순서대로 렌더링 */}
+                {searchResults.map((result, index) => (
+                    <ResultTweet
+                        key={result.query + index}
+                        tweets={result.tweets}
+                        hasSearched={result.hasSearched}
+                        searchQuery={result.query} // 검색어도 표시하기 위해 추가
+                    />
+                ))}
+            </SearchResultsContainer>
         </Wrapper>
     );
 }

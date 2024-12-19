@@ -78,7 +78,18 @@ const SearchResultsContainer = styled.div`
     padding: 10px; // 여백 추가
 `;
 
-const SearchBtn = styled.div`
+const SearchInput = styled.input<{ disabled?: boolean }>`
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    outline: none;
+    width: 240px;
+    opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+    cursor: ${(props) => (props.disabled ? "not-allowed" : "text")};
+`;
+
+const SearchBtn = styled.div<{ disabled?: boolean }>`
     cursor: pointer;
     border: 3px solid white;
     height: 36px;
@@ -91,21 +102,18 @@ const SearchBtn = styled.div`
         width: 32px;
         fill: white;
     }
+    ${(props) =>
+        !props.disabled &&
+        `
     &:hover {
         border-color: #ffe863;
         svg {
             fill: #ffe863;
         }
-    }
-`;
-
-const SearchInput = styled.input`
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    outline: none;
-    width: 200px;
+    `}
+    cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+    border: 3px solid ${(props) => (props.disabled ? "#ccc" : "white")};
+    opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 `;
 
 interface SearchResult {
@@ -117,8 +125,9 @@ interface SearchResult {
 export default function Layout() {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태
-    // 검색 결과들을 배열로 관리
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]); // 검색 결과들을 배열로 관리
+
+    const isSearchDisabled = searchResults.length >= 3; // 검색 결과가 3개 이상인 지 확인
 
     // 파이어스토어에서 검색어에 해당하는 데이터 찾기
     const searchInFirestore = async (queryText: string) => {
@@ -156,6 +165,9 @@ export default function Layout() {
             // 3개 미만이면 그냥 추가
             return [...prev, newResult];
         });
+
+        // 검색 완료 후 검색어 초기화
+        setSearchQuery("");
     };
 
     // 검색어 입력 핸들러 (검색 요청을 위한 상태 업데이트만)
@@ -165,7 +177,7 @@ export default function Layout() {
 
     // 돋보기 버튼 클릭 시 검색 실행
     const handleSearch = () => {
-        if (searchQuery.length > 0) {
+        if (searchQuery.length > 0 && !isSearchDisabled) {
             // 최소 1글자 이상일 때만 검색
             searchInFirestore(searchQuery); // Firestore 쿼리 실행
         }
@@ -173,7 +185,7 @@ export default function Layout() {
 
     // Enter 키를 눌렀을 때 검색 실행
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && searchQuery.length > 0) {
+        if (e.key === "Enter" && searchQuery.length > 0 && !isSearchDisabled) {
             searchInFirestore(searchQuery); // Firestore 쿼리 실행
         }
     };
@@ -184,6 +196,11 @@ export default function Layout() {
             await auth.signOut();
             navigate("/login");
         }
+    };
+
+    // 검색 결과 삭제 함수
+    const handleDeleteResult = (index: number) => {
+        setSearchResults((prev) => prev.filter((_, i) => i !== index));
     };
 
     return (
@@ -240,12 +257,17 @@ export default function Layout() {
             <SearchContainer>
                 <SearchInput
                     type="text"
-                    placeholder="검색"
+                    placeholder={
+                        isSearchDisabled
+                            ? "최대 타임라인 수에 도달했습니다."
+                            : "검색"
+                    }
                     value={searchQuery}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyPress} // Enter 키 이벤트 처리
+                    disabled={isSearchDisabled}
                 />
-                <SearchBtn onClick={handleSearch}>
+                <SearchBtn onClick={handleSearch} disabled={isSearchDisabled}>
                     {" "}
                     {/* 돋보기 버튼 클릭 시 검색 */}
                     <svg
@@ -275,6 +297,7 @@ export default function Layout() {
                         tweets={result.tweets}
                         hasSearched={result.hasSearched}
                         searchQuery={result.query} // 검색어도 표시하기 위해 추가
+                        onDelete={() => handleDeleteResult(index)} // 삭제 함수 전달
                     />
                 ))}
             </SearchResultsContainer>

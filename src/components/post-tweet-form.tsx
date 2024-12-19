@@ -116,6 +116,7 @@ export default function PostTweetForm() {
                 createdAt: Date.now(),
                 username: user.displayName || "Anonymous",
                 userId: user.uid,
+                photo: null, // 초기값으로 photo 필드를 추가
             });
 
             if (file) {
@@ -125,7 +126,6 @@ export default function PostTweetForm() {
                 );
 
                 const result = await uploadBytes(locationRef, file);
-
                 const url = await getDownloadURL(result.ref);
 
                 await updateDoc(doc, {
@@ -134,7 +134,6 @@ export default function PostTweetForm() {
             }
 
             setTweet("");
-
             setFile(null);
         } catch (e) {
             console.log(e);
@@ -154,7 +153,7 @@ export default function PostTweetForm() {
                 placeholder="What is happening?!"
             />
             <AttachFileButton htmlFor="file">
-                {file ? "Photo added ✅" : "Add photo"}
+                {file ? "사진 추가됨 ✅" : "사진 추가"}
             </AttachFileButton>
             {/* label click */}
             <AttachFileInput
@@ -165,7 +164,7 @@ export default function PostTweetForm() {
             />
             <SubmitBtn
                 type="submit"
-                value={isLoading ? "Posting..." : "Post Tweet"}
+                value={isLoading ? "작성중..." : "작성 완료"}
             />
         </Form>
     );
